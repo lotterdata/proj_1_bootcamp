@@ -1,14 +1,14 @@
 library(dplyr)
 
-store.compact <- function(filename){
-  temp <- read.table(filename, header = TRUE, sep = ",")
+store.compact <- function(infilename, outfilename){
+  temp <- read.table(infilename, header = TRUE, sep = ",")
   temp <- select(temp, 
                  unique_transaction_id, 
                  dollarsobligated,
                  maj_agency_cat,
                  state,
                  congressionaldistrict) 
-  write.table(temp, "ContractSpending.csv", 
+  write.table(temp, outfilename, 
               append = TRUE, 
               row.names = FALSE, 
               col.names = FALSE,
