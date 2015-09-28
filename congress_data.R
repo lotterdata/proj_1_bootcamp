@@ -37,3 +37,7 @@ RepData <- filter(RepData, !(State %in% c('PR','VI','GU','DC','AS','MP'))) %>%
            mutate(., SmallBusiness = str_detect(Committees,'Small Business')) %>%
            mutate(., Transportation = str_detect(Committees,'Transportation')) %>%
            mutate(., VeteransAffairs = str_detect(Committees,'Veterans'))
+
+write.table(RepData, "CongressData.csv", row.names = FALSE, sep = ',')
+
+rm(RepData)
