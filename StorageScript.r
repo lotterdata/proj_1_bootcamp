@@ -79,25 +79,3 @@ store.compact("contract_data/Data_Feed-70.csv","ContractSpending.csv")
 store.compact("contract_data/Data_Feed-71.csv","ContractSpending.csv")
 store.compact("contract_data/Data_Feed-72.csv","ContractSpending.csv")
 store.compact("contract_data/Data_Feed-73.csv","ContractSpending.csv")
-
-cstest <- read.csv("ContractSpending.csv", header = FALSE)
-
-agency_codes <- unique(cstest$V3)
-lower <- agency_codes[str_detect(agency_codes,'[:lower:]+')]
-lower <- array(lower)
-agency_codes <- data.frame(id = str_sub(lower,1,4), agency = str_sub(lower,7))
-write.table(agency_codes,
-            "agency_codes.csv", 
-            append = FALSE, 
-            row.names = FALSE,
-            sep = ",")
-rm(lower, agency_codes)
-
-cstest <- mutate(cstest, Agency.Code = str_sub(V3,1,4))
-
-colnames(cstest) <- c('ID', 'Dollars.Obligated', 'oldagnc', 'State', 'Congress.District', 'Agency.Code' )
-
-cstest <-select(cstest, ID, Agency.Code, Dollars.Obligated, State, Congress.District)
-write.table(cstest, "ContractSpendingClean.csv", row.names = FALSE, sep = ',')
-
-rm(cstest)
