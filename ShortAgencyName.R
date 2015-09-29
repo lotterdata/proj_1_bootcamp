@@ -33,3 +33,5 @@ for(code in temp$id){
   temp$ShortName[temp$id==code] <- Short.Agency.Names(code)
 }
 write.table(temp,"agency_codes.csv",row.names = FALSE, sep = ",")
+
+rm(temp)

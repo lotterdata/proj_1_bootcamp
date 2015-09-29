@@ -6,8 +6,11 @@ store.compact <- function(infilename, outfilename){
                  unique_transaction_id, 
                  dollarsobligated,
                  maj_agency_cat,
+                 vendorcountrycode,
                  state,
-                 congressionaldistrict) 
+                 congressionaldistrict,
+                 placeofperformancecongressionaldistrict) 
+  
   write.table(temp, outfilename, 
               append = TRUE, 
               row.names = FALSE, 
