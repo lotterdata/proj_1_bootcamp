@@ -22,8 +22,17 @@ get.district <- function(member_string){
   }
 }
 
+get.code <- function(state, district){
+  if(str_length(district) == 1)
+    return(str_c(state,'0',district))
+  else
+    return(str_c(state,district))
+}
+
 RepData$State = sapply(RepData$Member, get.state)
 RepData$District = sapply(RepData$Member, get.district)
+RepData$DistrictCode = mapply(get.code, RepData$State, RepData$District)
+
 
 RepData <- filter(RepData, !(State %in% c('PR','VI','GU','DC','AS','MP'))) %>%
            mutate(., Agriculture = str_detect(Committees,'Agriculture')) %>%
