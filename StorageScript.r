@@ -79,3 +79,6 @@ store.compact("contract_data/Data_Feed-70.csv","ContractSpending.csv")
 store.compact("contract_data/Data_Feed-71.csv","ContractSpending.csv")
 store.compact("contract_data/Data_Feed-72.csv","ContractSpending.csv")
 store.compact("contract_data/Data_Feed-73.csv","ContractSpending.csv")
+
+temp <- read.csv("ContractSpending.csv", header = FALSE)
+saveRDS(temp,"contracts_raw.rds")

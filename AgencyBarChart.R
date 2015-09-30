@@ -1,7 +1,7 @@
 library(ggplot2)
 library(dplyr)
 library(scales)
-#source("LoadPreprocessed.R")
+source("LoadPreprocessed.R")
 
 
 by_agency.plot.data <- inner_join(contracts,agencies, by = c("Agency.Code" = "id")) %>%

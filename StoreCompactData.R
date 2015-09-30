@@ -9,7 +9,8 @@ store.compact <- function(infilename, outfilename){
                  vendorcountrycode,
                  state,
                  congressionaldistrict,
-                 placeofperformancecongressionaldistrict) 
+                 placeofperformancecongressionaldistrict,
+                 placeofperformancezipcode) 
   
   write.table(temp, outfilename, 
               append = TRUE, 
