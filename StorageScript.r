@@ -1,10 +1,9 @@
 library(stringr)
 library(dplyr)
 
-source('~/datascience/proj_1_bootcamp/StoreCompactData.R')
+source('~/nycdsa/proj_1_bootcamp/StoreCompactData.R')
 
 system("rm ContractSpending.csv")
-
 
 store.compact("contract_data/Data_Feed.csv","ContractSpending.csv")
 store.compact("contract_data/Data_Feed-2.csv","ContractSpending.csv")
@@ -80,5 +79,5 @@ store.compact("contract_data/Data_Feed-71.csv","ContractSpending.csv")
 store.compact("contract_data/Data_Feed-72.csv","ContractSpending.csv")
 store.compact("contract_data/Data_Feed-73.csv","ContractSpending.csv")
 
-temp <- read.csv("ContractSpending.csv", header = FALSE)
+temp <- read.csv("ContractSpending.csv", header = FALSE, stringsAsFactors = FALSE)
 saveRDS(temp,"contracts_raw.rds")

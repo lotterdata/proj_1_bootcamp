@@ -1,0 +1,540 @@
+---
+title: "Federal Spending and Congressional Representation"
+author: "Stephen Penrice"
+date: "October 3, 2015"
+output: 
+  html_document: 
+    keep_md: yes
+---
+##Introduction
+This project creates some visualizations that relate federal government contract spending to the status of the member of Congress that represents the district in which the contract work is performed. In particular, it looks at Representatives' seniority and whether they serve on a committee that is related to the department or agency that issued the contract. All contract data are from FY 2015 and information on Congress is for the current (114th) Congress.
+
+##Gathering Data
+I downloaded the contract data manually from <https://www.usaspending.gov/DownloadCenter/Pages/DataDownload.aspx>. I limited my downloads to the 24 agencies listed under "CFO" in the "Agency" drop-down menu. Because of the volume of the Defense Department data, I had to download data for each individual state one-by-one. This resulted in a total of 73 files containing 4.9 gigs of data.
+
+In order to create a managable file to use in the project I used the following function to open each downloaded file, extract the fields I wanted, and place to pared data in a single file.
+
+```{r eval = FALSE}
+library(dplyr)
+
+store.compact <- function(infilename, outfilename){
+  temp <- read.table(infilename, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+  temp <- select(temp, 
+                 unique_transaction_id, 
+                 dollarsobligated,
+                 maj_agency_cat,
+                 vendorcountrycode,
+                 state,
+                 congressionaldistrict,
+                 placeofperformancecongressionaldistrict,
+                 placeofperformancezipcode) 
+  
+  write.table(temp, outfilename, 
+              append = TRUE, 
+              row.names = FALSE, 
+              col.names = FALSE,
+              sep = ",")
+  rm(temp)
+}
+```
+
+I used the following script to call the function. (I set eval = FALSE for this chunk. Subsequent chunks can be run since they read local data that are in the same directory as this markdown file.)
+```{r eval=FALSE}
+library(stringr)
+library(dplyr)
+
+source('~/nycdsa/proj_1_bootcamp/StoreCompactData.R')
+
+system("rm ContractSpending.csv")
+
+store.compact("contract_data/Data_Feed.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-2.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-3.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-4.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-5.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-6.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-7.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-8.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-9.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-10.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-11.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-12.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-13.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-14.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-15.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-16.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-17.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-18.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-19.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-20.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-21.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-22.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-23.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-24.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-25.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-26.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-27.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-28.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-29.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-30.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-31.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-32.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-33.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-34.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-35.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-36.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-37.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-38.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-39.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-40.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-41.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-42.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-43.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-44.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-45.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-46.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-47.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-48.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-49.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-50.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-51.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-52.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-53.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-54.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-55.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-56.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-57.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-58.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-59.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-60.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-61.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-62.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-63.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-64.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-65.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-66.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-67.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-68.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-69.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-70.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-71.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-72.csv","ContractSpending.csv")
+store.compact("contract_data/Data_Feed-73.csv","ContractSpending.csv")
+
+temp <- read.csv("ContractSpending.csv", header = FALSE, stringsAsFactors = FALSE)
+saveRDS(temp,"contracts_raw.rds")
+```
+  
+I used the following code to download Congressional Committee data from <http://clerk.house.gov/committee_info/oal.aspx> and seniority data from <http://pressgallery.house.gov/member-data/seniority>
+
+```{r eval=FALSE}
+library(stringr)
+library(XML)
+library(dplyr,warn.conflicts=FALSE)
+
+url <- "http://clerk.house.gov/committee_info/oal.aspx"
+RepData <- readHTMLTable(url, header = TRUE, stringsAsFactors = FALSE) %>% 
+           data.frame() %>% tbl_df()
+colnames(RepData) <- c("Member", "Committees")
+
+url <- "http://pressgallery.house.gov/member-data/seniority"
+SeniorData <- readHTMLTable(url, header = TRUE, stringsAsFactors = FALSE)[[1]] %>%
+  select(., 2:4)
+colnames(SeniorData) <- c('Member','PartyAndState','Terms')
+```
+
+##Processing Data
+The first step in preparing the contract data for analysis was to create a mapping between the 4-digit codes and agency names, including both the long agency names included in the source files and a shorter, more convenient name I created with the following function.
+```{r}
+Short.Agency.Names <- function(code){
+
+	if(code == 1200) return('Agriculture')
+	else if(code == 1300) return('Commerce')
+	else if(code == 1400) return('Interior')
+	else if(code == 1500) return('Justice')
+	else if(code == 1600) return('Labor')
+	else if(code == 1900) return('State')
+	else if(code == 2000) return('Treasury')
+	else if(code == 2400) return('Personnel Management')
+	else if(code == 2800) return('Social Security')
+	else if(code == 3100) return('Nuclear Reg Comm')
+	else if(code == 3600) return('Veterans Affairs')
+	else if(code == 4700) return('GSA')
+	else if(code == 4900) return('NSF')
+	else if(code == 6800) return('EPA')
+	else if(code == 6900) return('Transportation')
+	else if(code == 7000) return('Homeland Security')
+	else if(code == 7200) return('USAID')
+	else if(code == 7300) return('Small Business Admin')
+	else if(code == 7500) return('HHS')
+	else if(code == 8000) return('NASA')
+	else if(code == 8600) return('HUD')
+	else if(code == 8900) return('Energy')
+	else if(code == 9100) return('Education')
+	else if(code == 9700) return('Defense')
+}
+```  
+
+The actual mapping was created with the following code.
+```{r eval = FALSE}
+cstest <- readRDS("contracts_raw.rds")
+
+# Create a mapping between agency codes and agency names, as implied by the contract data
+# Each name appears twice in the raw files, so we pick the version that includes lowercase letters
+agency_codes <- unique(cstest$V3)
+lower <- agency_codes[str_detect(agency_codes,'[:lower:]+')]
+lower <- array(lower)
+agency_codes <- data.frame(id = str_sub(lower,1,4), Agency = str_sub(lower,7))
+
+for(code in agency_codes$id){
+  agency_codes$ShortName[agency_codes$id==code] <- Short.Agency.Names(code)
+}
+agency_codes$id <- as.character(agency_codes$id)
+saveRDS(agency_codes,"agency_codes.rds")
+rm(lower, agency_codes, code, Short.Agency.Names)
+```
+
+Next I did some cleaning on the contract data.
+
+```{r eval=FALSE}
+# Various cleaning tasks for contract data
+
+# Create new field containing agency code
+cstest <- mutate(cstest, Agency.Code = str_sub(V3,1,4)) 
+# Add field names that were omitted during storage
+colnames(cstest) <- c('ID', 'Dollars.Obligated', 'oldagnc', 'country','State', 
+                      'Congress.District', 'pop_cd','pop_zip','Agency.Code')
+
+# Filter out non-state juridictions, non-existent district codes
+cstest <- filter(cstest, !(str_sub(pop_cd,1,2) %in% c('PR','VI','GU','DC','AS','MP'))) %>%
+          filter(., !(pop_cd == 'CA00' | pop_cd == 'WV00')) 
+
+# Select fields needed downstream, and shorten zip to 5 digits (as used in county mapping)
+cstest <-select(cstest, ID, Agency.Code, Dollars.Obligated, State, pop_cd, pop_zip)
+cstest$Agency.Code <- as.character(cstest$Agency.Code )
+cstest$pop_zip <- sapply(cstest$pop_zip, function(x) str_sub(x,1,5))
+saveRDS(cstest,"contracts.rds")
+
+rm(cstest)
+```
+
+The next step was to parse the data on committee membership, including producing codes for congressional districts as used in the contract data. This is also where I filtered out non-voting members (from Puerto Rico, Guam, etc.)  
+
+```{r eval=FALSE}
+# Get last name (required later for merge)
+get.last.name <- function(member_string){
+  temp <- str_split(member_string, ",")
+  return(temp[[1]][1]) 
+}
+
+# Get first name (required later for merge)
+get.first.name <- function(member_string){
+  temp <- str_split(member_string, ",")
+  temp <- temp[[1]][2]
+  temp <- str_split(str_sub(temp, start = 2)," ")
+  return(temp[[1]][1])
+  return(temp)
+}
+
+# Get state abbreviation
+get.state <- function(member_string){
+  temp <- str_split(member_string, " ")
+  return(temp[[1]][length(temp[[1]])])
+}
+
+# Get district number (0 if from a single-district state such as Delaware)
+get.district <- function(member_string){
+  temp <- str_split(member_string, " ")
+  text <- temp[[1]][length(temp[[1]])-1]
+  if(str_detect(text,'[:digit:]+')){
+    return(str_extract(text,'[:digit:]+'))
+  }else{
+    return('0')
+  }
+}
+
+# Combine state and district number into a 4-character code, e.g. NJ11
+get.code <- function(state, district){
+  if(str_length(district) == 1)
+    return(str_c(state,'0',district))
+  else
+    return(str_c(state,district))
+}
+
+RepData$FirstName <- sapply(RepData$Member, get.first.name)
+RepData$LastName <- sapply(RepData$Member, get.last.name)
+RepData$State <- sapply(RepData$Member, get.state)
+RepData$District <- sapply(RepData$Member, get.district)
+RepData$DistrictCode <- mapply(get.code, RepData$State, RepData$District) %>%
+                        as.character(.)
+
+RepData <- filter(RepData, !(State %in% c('PR','VI','GU','DC','AS','MP')))
+```
+  
+Different functions were required for the data on seniority. Note that there is no district number in this table.
+```{r eval = FALSE}
+get.state.senior <- function(ps){
+  temp <- str_split(ps,",")
+  return(str_sub(temp[[1]][2],2,3))
+}
+
+get.last.name.senior <- function(memb){
+  temp <- str_split(memb," ")[[1]][-1]
+  temp <- ifelse(str_detect(temp,'\\*'),str_sub(temp,1,-2),temp)
+  return(temp[[1]])
+}
+
+get.first.name.senior <- function(memb){
+  temp <- str_split(memb," ")[[1]][1]
+  temp <- ifelse(str_detect(temp,'\\*'),str_sub(temp,1,-2),temp)
+  return(temp[[1]])
+}
+
+SeniorData$FirstName = sapply(SeniorData$Member,get.first.name.senior)
+SeniorData$LastName = sapply(SeniorData$Member,get.last.name.senior)
+SeniorData$State = sapply(SeniorData$PartyAndState,get.state.senior)
+
+SeniorData <- select(SeniorData, FirstName, LastName, State, Terms)
+```
+  
+The next challenge was to merge the committee data with the seniority data. Since there was no district data in the seniority table, I had to try merging by first name, last name, and state.
+```{r eval=FALSE}
+LeftData <- left_join(RepData, SeniorData, by = c('State','FirstName','LastName'))
+```
+This was not successful in every case, due things like diacritical marks, abbreviations, and nicknames. Since most of the problems seemed to be with first names and since matching last names within a state are not common, I tooked the rows that failed to match on the first attempt and tryed to join on last name and state. I used the successful matches to populate the "Terms" field in the "LeftData" data frame.
+```{r eval=FALSE}
+MissingLeft <- filter(LeftData,is.na(Terms))
+FixerByLast <- left_join(MissingLeft,SeniorData, by = c('State','LastName')) %>%
+               select(.,DistrictCode,Terms.y) %>%
+               filter(.,!is.na(Terms.y))
+for(d in FixerByLast$DistrictCode){
+  LeftData$Terms[LeftData$DistrictCode == d] <- FixerByLast$Terms.y[FixerByLast$DistrictCode == d]
+}
+```
+There were still 17 unmatched rows, so I repeated the process, but this time matching on first name and state. The manual correction was necessary because there are two representatives from NJ named "Donald." 
+```{r eval=FALSE}
+MissingLeft <- filter(LeftData,is.na(Terms))
+FixerByFirst <- left_join(MissingLeft,SeniorData, by = c('State','FirstName')) %>%
+  select(.,DistrictCode,Terms.y) %>%
+  filter(.,!is.na(Terms.y)) %>%
+  filter(., !(DistrictCode=='NJ10' & Terms.y !=3))
+for(d in FixerByFirst$DistrictCode){
+  LeftData$Terms[LeftData$DistrictCode == d] <- FixerByFirst$Terms.y[FixerByFirst$DistrictCode == d]
+}
+```
+This left two unmatched rows, so I populated "Terms" for them manually. Then I converted "Terms" to integer type.
+```{r eval=FALSE}
+LeftData$Terms[LeftData$DistrictCode == 'MO01'] <- 8
+LeftData$Terms[LeftData$DistrictCode == 'WA03'] <- 3
+LeftData$Terms <- as.integer(LeftData$Terms)
+```
+Then I was finally ready to merge the seniority data in LeftData with RepData. I did so and also created a categorical field based on terms. Then I cleaned up the workspace.
+```{r eval=FALSE}
+RepData <- inner_join(RepData, LeftData, by = "DistrictCode") %>%
+           select(., ends_with('x'), DistrictCode, Terms) %>%
+           select(., Member = Member.x, Committees = Committees.x, State = State.x, DistrictCode, Terms)
+RepData$Seniority <- cut(RepData$Terms,
+                         c(0,1,3,7,30),
+                         c('1st Term', '2 to 3 Terms', '4 to 7 Terms', '8 or More Term'),
+                         include.lowest = FALSE)
+
+rm(SeniorData, FixerByFirst, FixerByLast, LeftData, MissingLeft, d, url)
+rm(get.code, get.district, 
+   get.first.name, get.first.name.senior, 
+   get.last.name, get.last.name.senior,
+   get.state,
+   get.state.senior)
+```
+
+The final step in terms of preparation was to add flags for each committee that I might use in my analysis. I also added I flag for whether the member has a leadership position, although in the end I did not use it.
+```{r eval=FALSE}
+RepData <- mutate(RepData, Agriculture = str_detect(Committees,'Agriculture')) %>%
+           mutate(., Appropriations = str_detect(Committees,'Appropriations')) %>%
+           mutate(., ArmedServices = str_detect(Committees,'Armed Services')) %>%
+           mutate(., Education = str_detect(Committees,'Education')) %>%
+           mutate(., EnergyCommerce = str_detect(Committees,'Energy and')) %>%
+           mutate(., HomelandSecurity = str_detect(Committees,'Homeland')) %>%
+           mutate(., NaturalResources = str_detect(Committees,'Natural')) %>%
+           mutate(., ScienceSpaceTechnology = str_detect(Committees,'Science')) %>%
+           mutate(., SmallBusiness = str_detect(Committees,'Small Business')) %>%
+           mutate(., Transportation = str_detect(Committees,'Transportation')) %>%
+           mutate(., VeteransAffairs = str_detect(Committees,'Veterans')) %>%
+           mutate(., Leadership = str_detect(Member,'Boehner.|Pelosi.|McCarthy.|Hoyer.|Clyburn.|Scalise.')) 
+
+write.table(RepData, "CongressData.csv", row.names = FALSE, sep = ',')
+saveRDS(RepData,"CongressData.rds")
+
+rm(RepData)
+```
+  
+##Analysis
+First we make sure all the required libraries are loaded and load the data we stored in previous steps.  
+```{r cache=TRUE}
+library(stringr)
+library(XML)
+library(dplyr,warn.conflicts=FALSE)
+library(ggplot2)
+library(scales)
+
+contracts <- readRDS("contracts.rds") %>% tbl_df()
+agencies <- readRDS("agency_codes.rds") %>% tbl_df()
+congress <- readRDS("CongressData.rds") %>% tbl_df()
+```
+  
+  
+As a warm-up, we display a bar chart showing the largest agencies by contract value.
+```{r cache=TRUE, fig.width=10}
+# library(stringr)
+# library(dplyr,warn.conflicts=FALSE)
+# library(ggplot2)
+# library(scales)
+
+by_agency.plot.data <- inner_join(contracts,agencies, by = c("Agency.Code" = "id")) %>%
+                       group_by(.,ShortName) %>%
+                       summarise(., Total = sum(Dollars.Obligated)/1e9) %>%
+                       filter(., Total > 5)
+
+agency.plot <- ggplot(aes(x=reorder(ShortName,Total), y=Total), data = 
+                        by_agency.plot.data) +
+               geom_bar(stat = "identity")  +
+               scale_x_discrete(name = "") +
+               scale_y_continuous(name = "Total Contracts (billions)",
+                                  labels = dollar) +
+               ggtitle("Largest Agencies by Total Contract Value") +
+               theme_bw()
+
+agency.plot
+```
+  
+Then we plot some histograms where the data points are congressional districts and we are bucketing them according to the total value of contacts in each district.
+```{r cache=TRUE, fig.width=10, message=FALSE}
+# library(ggplot2)
+# library(dplyr)
+# library(scales)
+
+by_district <- group_by(contracts, pop_cd) %>%
+               summarise(., Total = sum(Dollars.Obligated)/1e6) %>%
+               rename(., DistrictCode = pop_cd) %>%
+               semi_join(.,congress, by = "DistrictCode")
+by_district$Total <- sapply(by_district$Total, function(x) ifelse(x<1,1,x))
+
+district.plot <- ggplot(aes(x=Total), data = by_district) +
+                 geom_histogram() +
+                 scale_x_continuous(name = "Total Contracts (millions)",
+                     labels = dollar) +
+                 ggtitle('Counts of Congressional Districts by Total Contract Values') +
+                 ylab('') +
+                 theme_bw()
+
+district.plot
+
+```
+
+One takeaway from this plot is that the distribution is highly skewed. We will have to use log scales in some of our plots and a statistical analysis might have to use non-parametric methods. We plot similar histograms for specific departements, starting with defense.
+
+```{r cache=TRUE, fig.width=10, message=FALSE}
+by_district_agency <- inner_join(contracts,agencies, by = c("Agency.Code" = "id")) %>%
+                      group_by(., pop_cd, ShortName) %>%
+                      summarise(., Total = sum(Dollars.Obligated)/1e6) %>%
+                      rename(., DistrictCode = pop_cd) %>%
+                      semi_join(.,congress, by = 'DistrictCode')
+by_district_agency$Total <- sapply(by_district_agency$Total,  function(x) ifelse(x<1,1,x))
+
+defense.plot <- ggplot(data=filter(by_district_agency,ShortName=='Defense'),
+                       aes(x=Total)) +
+                geom_histogram(binwidth = 100) +
+                scale_x_continuous(name = "Total Contracts (millions)",
+                     labels = dollar) +
+                ggtitle('Counts of Congressional Districts by Total Defense Contract Values') +
+                ylab('') +
+                theme_bw()
+
+defense.plot
+```
+Similar plots for other selected departments and agencies.
+```{r cache=TRUE, fig.width=10, message=FALSE}
+by_district_agency_other <- filter(by_district_agency, 
+                                   ShortName %in% c('NASA', 'Veterans Affairs',
+                                                    'HHS', 'Energy'))
+
+other.plot <- ggplot(data = by_district_agency_other, aes(x = Total)) +
+              facet_grid(ShortName~.) +
+              geom_histogram(binwidth = 10) +
+              scale_x_continuous(name = "Total Contracts (millions)",
+                                 labels = dollar) +
+              ggtitle('Counts of Congressional Districts by Total Contract Values') +
+              ylab('') +
+              coord_cartesian(xlim = c(0,250)) +
+              theme_bw()
+
+other.plot
+```
+
+Next we plot some graphs showing the distrbution of contract values across congressional districts according to committee membership of the Congressperson representing that district. We do so by department, and in each graph we show the distribution for committee responsible for the given deparftment as well as the Appropriations committee and all other members of congress. First we create a data frame that joins contract data to congressional data, and then we create a function to in sure uniform-looking plots.
+
+```{r cache=FALSE, fig.width=10, message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(scales)
+by_distr_agc_comm <- inner_join(by_district_agency, congress, by = "DistrictCode") %>%
+                     select(., DistrictCode, Seniority, ShortName, Total, 9:20) 
+
+
+make.plot <- function(DeptName,CommName){
+  plot.data <- filter(by_distr_agc_comm, ShortName == DeptName) 
+  comm.bool <- select(plot.data,matches(CommName))[[2]]
+  plot.data$Committee <- mapply(function(x,y) if(x) CommName 
+                                   else if(y) 'Appropriations'
+                                   else 'Other',
+                                   comm.bool, 
+                                   plot.data$Appropriations)
+  plot.data$Committee <- factor(plot.data$Committee, 
+                                   levels = c(CommName,'Appropriations', 'Leadership','Other'))
+  
+  return.plot <- ggplot(data = plot.data, 
+                        aes(x = Committee, y = Total, color = Committee), guide = TRUE) +
+                 geom_jitter(position = position_jitter(height = 0.2, width = 0.25), 
+                             size = 2) +
+                 coord_trans(y = 'log10') +
+                 scale_size_discrete(range = c(2,4)) +
+                 scale_y_continuous(name = "Total Contracts (millions)",
+                                    labels = dollar) +
+                 ggtitle(str_c('Department: ', DeptName)) +
+                 scale_x_discrete(labels = '') +
+                 geom_hline(yintercept = median(plot.data$Total),
+                            color = 'black', linetype = 'solid', width = 2) +
+                 xlab('') +
+                 theme_bw()
+}
+```
+Here are the plots for various departments and agencies. The black line represents the median for the set of all 435 districts for the given agency.
+```{r cache=FALSE, fig.width=10, message=FALSE, echo=FALSE}
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(stringr)
+defense.comm.plot <- make.plot('Defense','ArmedServices')
+defense.comm.plot
+agriculture.comm.plot <- make.plot('Agriculture','Agriculture')
+agriculture.comm.plot
+veterans.comm.plot <- make.plot('Veterans Affairs','VeteransAffairs')
+veterans.comm.plot
+homeland.comm.plot <- make.plot('Homeland Security','HomelandSecurity')
+homeland.comm.plot
+interior.comm.plot <- make.plot('Interior','NaturalResources')
+interior.comm.plot
+nasa.comm.plot <- make.plot('NASA','Science')
+nasa.comm.plot
+```
+  
+Since a representative's seniority is also a potential factor contirbuting spending in his or her district, we also look at plots broken up by seniority buckets. For reference we also display the size of each bucket.
+```{r cache=FALSE, fig.width=10, message=FALSE, echo=FALSE}
+table(congress$Seniority)
+defense.comm.plot + facet_grid(.~Seniority)
+agriculture.comm.plot + facet_grid(.~Seniority)
+veterans.comm.plot + facet_grid(.~Seniority)
+homeland.comm.plot + facet_grid(.~Seniority)
+interior.comm.plot + facet_grid(.~Seniority)
+nasa.comm.plot + facet_grid(.~Seniority)
+```
+

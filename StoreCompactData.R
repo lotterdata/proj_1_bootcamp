@@ -1,7 +1,7 @@
 library(dplyr)
 
 store.compact <- function(infilename, outfilename){
-  temp <- read.table(infilename, header = TRUE, sep = ",")
+  temp <- read.table(infilename, header = TRUE, sep = ",", stringsAsFactors = FALSE)
   temp <- select(temp, 
                  unique_transaction_id, 
                  dollarsobligated,
